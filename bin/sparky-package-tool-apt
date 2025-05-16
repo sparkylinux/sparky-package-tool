@@ -1,0 +1,294 @@
+#!/bin/bash
+
+# deps: bash, coreutils, apt, dialog, grep
+# Last update 2025/05/14 by pavroo
+# it uses APT
+
+DIALOG="`which dialog`"
+YESNO="--yesno "
+HEIGHT="20"
+WIDTH="80"
+MENUHEIGHT="12"
+TITLE="--title "
+ENTRY="--inputbox "
+MENU="--menu"
+TEXT=""
+TITLETEXT="Sparky Package Tool APT (SPTA)"
+
+#$TEXT"Choose your action:"
+mainmenu () {
+
+$DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"" $HEIGHT $WIDTH $MENUHEIGHT \
+Back "Back to main menu" \
+Update "Update package list only" \
+SafeUpgrade "Safe package upgrade" \
+FullUpgrade "Full package upgrade" \
+Check "Check is a package installed" \
+Info "Print info about a package" \
+Search "Search of available packages" \
+Download "Download a deb package only" \
+Simulate "Simulate a package installation only" \
+Install "Install a package" \
+ReInstall "Reinstall a package" \
+Remove "Uninstall a package" \
+Fix "Fix broken packages" \
+Clean "Clean the APT cache" \
+Exit "Exit" 2>/tmp/choice.$$
+# TODO: LocalInstall
+
+NEWACTION=`cat /tmp/choice.$$`
+
+if [ "$?" = "0" ]; then
+	NEWACTION=`cat /tmp/choice.$$`
+else
+	exit 0
+fi
+rm /tmp/choice.$$
+
+if [ "$NEWACTION" = "Back" ]; then
+	backmenu
+elif [ "$NEWACTION" = "Update" ]; then
+	updatemenu
+elif [ "$NEWACTION" = "SafeUpgrade" ]; then
+	safeupgrademenu
+elif [ "$NEWACTION" = "FullUpgrade" ]; then
+	fullupgrademenu
+elif [ "$NEWACTION" = "Check" ]; then
+	checkmenu
+elif [ "$NEWACTION" = "Info" ]; then
+	infomenu
+elif [ "$NEWACTION" = "Search" ]; then
+	searchmenu
+elif [ "$NEWACTION" = "Download" ]; then
+	downloadmenu
+elif [ "$NEWACTION" = "Simulate" ]; then
+	simulatemenu
+elif [ "$NEWACTION" = "Install" ]; then
+	installmenu
+elif [ "$NEWACTION" = "ReInstall" ]; then
+	reinstallmenu
+elif [ "$NEWACTION" = "Remove" ]; then
+	removemenu
+elif [ "$NEWACTION" = "Fix" ]; then
+	fixmenu
+elif [ "$NEWACTION" = "Clean" ]; then
+	cleanmenu
+else
+	clear
+	exit 0	
+fi
+
+}
+
+# back to main
+backmenu () {
+clear
+spt
+}
+
+# update
+updatemenu () {
+clear
+sudo apt update
+echo 'Done, package list updated, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# safe upgrade
+safeupgrademenu () {
+clear
+sudo apt upgrade
+echo 'Done, packages safe upgraded, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# full upgrade
+fullupgrademenu () {
+clear
+sudo apt full-upgrade
+echo 'Done, all packages full upgraded, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# check
+checkmenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a key name of a packege to check is already installed" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+
+clear
+#dpkg-query -l | grep $PACKAGE
+apt-cache policy $PACKAGE
+echo 'Done, the installed package list printed, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# info
+infomenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a name of a package to print info about it" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+clear
+
+apt info $PACKAGE
+echo 'Done, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+#search
+searchmenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a key name of a package to search it in the repository" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+clear
+
+#apt-cache search $PACKAGE
+apt search $PACKAGE
+echo 'Done, the available package list printed, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# download
+downloadmenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a package name to be downloaded from the repository to the user's home dir" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+clear
+
+#if [ ! -d $HOME/Downloads ]; then
+#mkdir -p $HOME/Downloads
+#fi
+#cd $HOME/Downloads
+apt-get download $PACKAGE
+echo 'Done, the deb package has been downloaded, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# simulate
+simulatemenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a name of a package to simulate installation" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+clear
+
+sudo apt install --no-install-recommends -s $PACKAGE
+echo 'Done, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# install
+installmenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a name of a package to be installed" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+clear
+
+sudo apt install --no-install-recommends $PACKAGE
+echo 'Done, the package has been installed, if you did not break the installation, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+#reinstall
+reinstallmenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a name of a package to be re-installed" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+clear
+
+sudo apt install --reinstall $PACKAGE
+echo 'Done, the package has been re-installed, if you did not break the installation, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# remove
+removemenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $ENTRY $TEXT"\nType in a name of a package to be uninstalled" $HEIGHT $WIDTH 2>/tmp/choice.$$
+if [ "$?" = "0" ]; then
+	PACKAGE=`cat /tmp/choice.$$`
+else
+	clear
+	mainmenu
+fi
+rm /tmp/choice.$$
+clear
+
+sudo apt purge $PACKAGE
+echo 'Done, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# fix
+fixmenu () {
+clear
+sudo apt install -f
+echo 'Done, press <ENTER> to Exit...' && read
+mainmenu
+}
+
+# clean
+cleanmenu () {
+clear
+$DIALOG $TITLE"$TITLETEXT" $YESNO $TEXT"\n\nRemove unnecessary packages?" $HEIGHT $WIDTH
+if [ $? = 0 ]; then
+	clear
+	sudo apt autoremove && echo 'Done, Press <ENTER> to Next Step...' && read
+fi
+
+$DIALOG $TITLE"$TITLETEXT" $YESNO $TEXT"\n\nClean up APT cache?" $HEIGHT $WIDTH
+if [ $? = 0 ]; then
+	clear
+	sudo apt clean
+	TESTAPTITUDE="`which aptitude`"
+	if [ "$TESTAPTITUDE" != "" ]; then
+		sudo aptitude purge ~c
+	fi
+	echo 'Done, Press <ENTER> to Exit...' && read
+fi
+clear
+mainmenu
+}
+
+mainmenu
