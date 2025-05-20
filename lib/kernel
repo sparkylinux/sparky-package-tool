@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# deps: bash, coreutils, apt, dialog, grep, sudo
+# + aptitude, nala (optional)
+# Last update 2025/05/20 by pavroo
+
+DIALOG="`which dialog`"
+YESNO="--yesno "
+HEIGHT="20"
+WIDTH="80"
+MENUHEIGHT="12"
+TITLE="--title "
+ENTRY="--inputbox "
+MENU="--menu"
+TEXT=""
+TITLETEXT="Sparky Kernel Tool"
+
+MANAGER=`cat /tmp/sparky-mgr`
+if [ "$MANAGER" = "APT" ]; then
+	MANAGER="apt"
+elif [ "$MANAGER" = "Aptitude" ]; then
+	MANAGER="aptitude"
+elif [ "$MANAGER" = "Nala" ]; then
+	MANAGER="nala"
+else
+	MANAGER="apt"
+fi
+
+if [ -f /tmp/sparky-kernel ]; then
+	rm -f /tmp/sparky-kernel
+fi
+
+clear
+$DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"\nChoose an action using $MANAGER :" $HEIGHT $WIDTH $MENUHEIGHT \
+Back "Back to main menu" \
+Remove "Ininstall a Linux kernel" \
+Exit "Exit" 2>/tmp/sparky-kernel
+
+if [ "$?" = "0" ]; then
+	ACTIONKER=`cat /tmp/sparky-kernel`
+else
+	clear
+	exit 0
+fi
+
+clear
+
+if [ "$ACTIONKER" = "Back" ]; then
+	spt
+elif [ "$ACTIONKER" = "Remove" ]; then
+	/usr/lib/sparky-package-tool/old-kernel
+elif [ "$ACTIONKER" = "Exit" ]; then
+	clear
+	exit 0
+else
+	clear
+	exit 0	
+fi
+
+exit 0

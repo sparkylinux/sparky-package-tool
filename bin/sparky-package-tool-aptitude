@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# deps: bash, coreutils, apt, dialog, grep, aptitude
-# Last update 2025/05/16 by pavroo
+# deps: bash, coreutils, apt, dialog, grep, sudo, aptitude
+# Last update 2025/05/20 by pavroo
 # it uses Aptitude
 
 # atitude opts: install, remove, purge, reinstall, update, safe-upgrade, full-upgrade, search, show, versions, clean, autoclean, download, -f (napraw), -O (zawsze wyświetal pytanie o wykonanie), -R (bez rekomendowanych), -s (symulacja), -y, -Z (pokazuje jak dużo miejsca użyje na dysku)
@@ -23,9 +23,9 @@ if [ "$CHECKAPTITUDE" = "" ]; then
 	echo ""
 	echo "  No Aptitude found."
 	echo "  Install aptitude package and try again."
-	echo "  Press <ENTER> to back to the Main window..." && read
+	echo "  Press <ENTER> to exit..." && read
 	echo ""
-	spt
+	exit 0
 fi
 
 #$TEXT"Choose your action:"
@@ -44,6 +44,7 @@ Simulate "Simulate a package installation only" \
 Install "Install a package" \
 ReInstall "Reinstall a package" \
 Remove "Uninstall a package" \
+Kernel "Install or remove Linux kernels" \
 Fix "Fix broken packages" \
 Clean "Clean the APT cache" \
 Exit "Exit" 2>/tmp/choice.$$
@@ -54,6 +55,7 @@ NEWACTION=`cat /tmp/choice.$$`
 if [ "$?" = "0" ]; then
 	NEWACTION=`cat /tmp/choice.$$`
 else
+	clear
 	exit 0
 fi
 rm /tmp/choice.$$
@@ -82,6 +84,8 @@ elif [ "$NEWACTION" = "ReInstall" ]; then
 	reinstallmenu
 elif [ "$NEWACTION" = "Remove" ]; then
 	removemenu
+elif [ "$NEWACTION" = "Kernel" ]; then
+	kernelmenu
 elif [ "$NEWACTION" = "Fix" ]; then
 	fixmenu
 elif [ "$NEWACTION" = "Clean" ]; then
@@ -269,6 +273,12 @@ clear
 sudo aptitude purge $PACKAGE
 echo 'Done, press <ENTER> to Exit...' && read
 mainmenu
+}
+
+# kernels
+kernelmenu () {
+clear
+/usr/lib/sparky-package-tool/kernel
 }
 
 # fix

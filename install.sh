@@ -23,6 +23,11 @@ if [ "$1" = "uninstall" ]; then
 	rm -f /usr/bin/spta
 	rm -f /usr/bin/sptt
 	rm -f /usr/bin/sptn
+	rm -rf /usr/lib/sparky-package-tool/
 else
 	cp bin/* /usr/bin/
+	if [ ! -d /usr/lib/sparky-package-tool ]; then
+		nkdir -p  /usr/lib/sparky-package-tool
+	fi
+	cp lib/* /usr/lib/sparky-package-tool/
 fi

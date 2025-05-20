@@ -1,0 +1,250 @@
+#!/bin/bash
+
+# Last update 2025/05/20 by pavroo
+
+MANAGER=`cat /tmp/sparky-mgr`
+if [ "$MANAGER" = "APT" ]; then
+	MANAGER="apt"
+elif [ "$MANAGER" = "Aptitude" ]; then
+	MANAGER="aptitude"
+elif [ "$MANAGER" = "Nala" ]; then
+	MANAGER="nala"
+else
+	MANAGER="apt"
+fi
+
+if [ -d /tmp/old-kernel-remover ]; then
+	rm -rf /tmp/old-kernel-remover
+fi
+mkdir -p /tmp/old-kernel-remover
+touch /tmp/old-kernel-remover/kernellist0
+touch /tmp/old-kernel-remover/kernellist
+KERNELACTIVE=`uname -r`
+dpkg-query -l | grep linux-image | grep -v meta | grep -v meta-package | grep -v template | cut -d ' ' -f 3 > /tmp/old-kernel-remover/kernellist0
+TEXT="The actual (active) kernel is: $KERNELACTIVE \nChoose a kernel to remove:"
+TITLETEXT="Sparky Old Kernel Remover"
+KERNELNUMBER=`cat /tmp/old-kernel-remover/kernellist0 | wc -l`
+
+# exit if only one kernel is installed
+if [ "$KERNELNUMBER" = "1" ]; then
+	clear
+	echo ""
+	echo "There is only one kernel installed on this system:"
+	echo "$KERNELACTIVE"
+	echo "Cannot be removed!"
+	echo 'Press <ENTER> to Exit...' && read
+	echo ""
+	exit 0
+fi
+
+# list kernels
+cat /tmp/old-kernel-remover/kernellist0 | grep -v "$KERNELACTIVE" > /tmp/old-kernel-remover/kernellist
+ILE=`cat /tmp/old-kernel-remover/kernellist | wc -l`
+GETWC01=`echo $ILE | grep 1` 
+GETWC02=`echo $ILE | grep 2`
+GETWC03=`echo $ILE | grep 3`
+GETWC04=`echo $ILE | grep 4`
+GETWC05=`echo $ILE | grep 5`
+GETWC06=`echo $ILE | grep 6`
+GETWC07=`echo $ILE | grep 7`
+GETWC08=`echo $ILE | grep 8`
+
+if [ "$GETWC01" != "" ]; then
+	OLD="1"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`
+elif [ "$GETWC02" != "" ]; then
+	OLD="2"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	OLDKERNEL02=`cat /tmp/old-kernel-remover/kernellist | tail -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1 | sed -e 's/image/headers/g'`
+elif [ "$GETWC03" != "" ]; then
+	OLD="3"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	OLDKERNEL02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1`
+	OLDKERNEL03=`cat /tmp/old-kernel-remover/kernellist | tail -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1 | sed -e 's/image/headers/g'`
+elif [ "$GETWC04" != "" ]; then
+	OLD="4"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	OLDKERNEL02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1`
+	OLDKERNEL03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1 `
+	OLDKERNEL04=`cat /tmp/old-kernel-remover/kernellist | tail -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1 | sed -e 's/image/headers/g'`
+elif [ "$GETWC05" != "" ]; then
+	OLD="5"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	OLDKERNEL02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1`
+	OLDKERNEL03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1`
+	OLDKERNEL04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1`
+	OLDKERNEL05=`cat /tmp/old-kernel-remover/kernellist | tail -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`	
+	OLDHEADERS02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS05=`cat /tmp/old-kernel-remover/kernellist | head -n5 | tail -n1 | sed -e 's/image/headers/g'`
+elif [ "$GETWC06" != "" ]; then
+	OLD="6"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	OLDKERNEL02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1`
+	OLDKERNEL03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1`
+	OLDKERNEL04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1`
+	OLDKERNEL05=`cat /tmp/old-kernel-remover/kernellist | head -n5 | tail -n1`
+	OLDKERNEL06=`cat /tmp/old-kernel-remover/kernellist | tail -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS05=`cat /tmp/old-kernel-remover/kernellist | head -n5 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS06=`cat /tmp/old-kernel-remover/kernellist | head -n6 | tail -n1 | sed -e 's/image/headers/g'`
+elif [ "$GETWC07" != "" ]; then
+	OLD="7"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	OLDKERNEL02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1`
+	OLDKERNEL03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1`
+	OLDKERNEL04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1`
+	OLDKERNEL05=`cat /tmp/old-kernel-remover/kernellist | head -n5 | tail -n1`
+	OLDKERNEL06=`cat /tmp/old-kernel-remover/kernellist | head -n6 | tail -n1`
+	OLDKERNEL07=`cat /tmp/old-kernel-remover/kernellist | tail -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS05=`cat /tmp/old-kernel-remover/kernellist | head -n5 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS06=`cat /tmp/old-kernel-remover/kernellist | head -n6 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS07=`cat /tmp/old-kernel-remover/kernellist | head -n7 | tail -n1 | sed -e 's/image/headers/g'`
+elif [ "$GETWC08" != "" ]; then
+	OLD="8"
+	OLDKERNEL01=`cat /tmp/old-kernel-remover/kernellist | head -n1`
+	OLDKERNEL02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1`
+	OLDKERNEL03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1`
+	OLDKERNEL04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1`
+	OLDKERNEL05=`cat /tmp/old-kernel-remover/kernellist | head -n5 | tail -n1`
+	OLDKERNEL06=`cat /tmp/old-kernel-remover/kernellist | head -n6 | tail -n1`
+	OLDKERNEL07=`cat /tmp/old-kernel-remover/kernellist | head -n7 | tail -n1`
+	OLDKERNEL08=`cat /tmp/old-kernel-remover/kernellist | tail -n1`
+	# get header version
+	OLDHEADERS01=`cat /tmp/old-kernel-remover/kernellist | head -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS02=`cat /tmp/old-kernel-remover/kernellist | head -n2 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS03=`cat /tmp/old-kernel-remover/kernellist | head -n3 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS04=`cat /tmp/old-kernel-remover/kernellist | head -n4 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS05=`cat /tmp/old-kernel-remover/kernellist | head -n5 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS06=`cat /tmp/old-kernel-remover/kernellist | head -n6 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS07=`cat /tmp/old-kernel-remover/kernellist | head -n7 | tail -n1 | sed -e 's/image/headers/g'`
+	OLDHEADERS08=`cat /tmp/old-kernel-remover/kernellist | head -n8 | tail -n1 | sed -e 's/image/headers/g'`
+fi
+
+# build menu window
+if [ "$OLD" = "1" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" --yesno 2>/tmp/spt-choice
+
+elif [ "$OLD" = "2" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" 02 "$OLDKERNEL02" --yesno 2>/tmp/spt-choice
+
+elif [ "$OLD" = "3" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" 02 "$OLDKERNEL02" 03 "$OLDKERNEL03" --yesno 2>/tmp/spt-choice
+
+elif [ "$OLD" = "4" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" 02 "$OLDKERNEL02" 03 "$OLDKERNEL03" 04 "$OLDKERNEL04" --yesno 2>/tmp/spt-choice
+
+elif [ "$OLD" = "5" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" 02 "$OLDKERNEL02" 03 "$OLDKERNEL03" 04 "$OLDKERNEL04" 05 "$OLDKERNEL05" --yesno 2>/tmp/spt-choice
+
+elif [ "$OLD" = "6" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" 02 "$OLDKERNEL02" 03 "$OLDKERNEL03" 04 "$OLDKERNEL04" 05 "$OLDKERNEL05" 06 "$OLDKERNEL06" --yesno 2>/tmp/spt-choice
+
+elif [ "$OLD" = "7" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" 02 "$OLDKERNEL02" 03 "$OLDKERNEL03" 04 "$OLDKERNEL04" 05 "$OLDKERNEL05" 06 "$OLDKERNEL06" 07 "$OLDKERNEL07" --yesno 2>/tmp/spt-choice
+
+elif [ "$OLD" = "7" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 00 "Exit" 01 "$OLDKERNEL01" 02 "$OLDKERNEL02" 03 "$OLDKERNEL03" 04 "$OLDKERNEL04" 05 "$OLDKERNEL05" 06 "$OLDKERNEL06" 07 "$OLDKERNEL07" 08 "$OLDKERNEL08" --yesno 2>/tmp/spt-choice
+fi
+
+if [ "$?" != "0" ]; then
+	RMKERNEL=`cat /tmp/spt-choice | head -n1`
+else
+	RMKERNEL="00"
+fi
+
+if [ "$RMKERNEL" = "00" ]; then
+	clear
+	dialog --title "$TITLETEXT" --msgbox "\nExiting..." 20 80
+	clear
+	#exit 1
+	if [ "$MANAGER" = "apt" ]; then
+		spta
+	elif [ "$MANAGER" = "aptitude" ]; then
+		sptt
+	elif [ "$MANAGER" = "nala" ]; then
+		sptn
+	else
+		spt
+	fi
+fi
+
+if [ "$RMKERNEL" = "01" ]; then
+	REMOVEKERNEL="$OLDKERNEL01"
+	REMOVEHEADERS="$OLDHEADERS01"
+elif [ "$RMKERNEL" = "02" ]; then
+	REMOVEKERNEL="$OLDKERNEL02"
+	REMOVEHEADERS="$OLDHEADERS02"
+elif [ "$RMKERNEL" = "03" ]; then
+	REMOVEKERNEL="$OLDKERNEL03"
+	REMOVEHEADERS="$OLDHEADERS03"
+elif [ "$RMKERNEL" = "04" ]; then
+	REMOVEKERNEL="$OLDKERNEL04"
+	REMOVEHEADERS="$OLDHEADERS04"
+elif [ "$RMKERNEL" = "05" ]; then
+	REMOVEKERNEL="$OLDKERNEL05"
+	REMOVEHEADERS="$OLDHEADERS05"
+elif [ "$RMKERNEL" = "06" ]; then
+	REMOVEKERNEL="$OLDKERNEL06"
+	REMOVEHEADERS="$OLDHEADERS06"
+elif [ "$RMKERNEL" = "06" ]; then
+	REMOVEKERNEL="$OLDKERNEL07"
+	REMOVEHEADERS="$OLDHEADERS07"
+elif [ "$RMKERNEL" = "08" ]; then
+	REMOVEKERNEL="$OLDKERNEL08"
+	REMOVEHEADERS="$OLDHEADERS08"
+fi
+
+if [ "$REMOVEKERNEL" != "" ]; then
+	dialog --title "$TITLETEXT" --yesno "\nShould I remove this kernel: $REMOVEKERNEL ?" 20 80
+	if [ "$?" != "0" ]; then
+		clear
+	else
+		clear
+		sudo $MANAGER purge $REMOVEKERNEL
+		sudo $MANAGER purge $REMOVEHEADERS
+		if  [ "$MANAGER" = "apt" ] || [ "$MANAGER" = "nala" ]; then
+			sudo $MANAGER autoremove
+		fi
+		echo 'Press <ENTER> to Exit...' && read
+		clear
+	fi	
+fi
+
+if [ "$MANAGER" = "apt" ]; then
+	spta
+elif [ "$MANAGER" = "aptitude" ]; then
+	sptt
+elif [ "$MANAGER" = "nala" ]; then
+	sptn
+else
+	spt
+fi
+
+exit 0

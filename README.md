@@ -24,6 +24,7 @@ coreutils
 apt
 dialog
 grep
+sudo
 
 Recommends:
 -------------

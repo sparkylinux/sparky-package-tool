@@ -1,8 +1,12 @@
 #!/bin/bash
 
-# deps: bash, coreutils, apt, dialog, grep
+# deps: bash, coreutils, apt, dialog, grep, sudo
 # + aptitude, nala (optional)
-# Last update 2025/05/13 by pavroo
+# Last update 2025/05/20 by pavroo
+
+if [ -f /tmp/sparky-mgr ]; then
+	rm -f /tmp/sparky-mgr
+fi
 
 DIALOG="`which dialog`"
 YESNO="--yesno "
@@ -19,16 +23,17 @@ $DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"\nChoose Package Manager Interface" $HEIG
 APT "Advanced Package Tool" \
 Aptitude "Front-end to APT" \
 Nala "Front-end for libapt-pkg" \
-Exit "Exit" 2>/tmp/choice.$$
+Exit "Exit" 2>/tmp/sparky-mgr
 
-FRONTEND=`cat /tmp/choice.$$`
+#FRONTEND=`cat /tmp/sparky-mgr`
 
 if [ "$?" = "0" ]; then
-	FRONTEND=`cat /tmp/choice.$$`
+	FRONTEND=`cat /tmp/sparky-mgr`
 else
+	clear
 	exit 0
 fi
-rm /tmp/choice.$$
+#rm /tmp/choice.$$
 
 if [ "$FRONTEND" = "APT" ]; then
 	spta
