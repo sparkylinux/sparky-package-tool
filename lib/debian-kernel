@@ -1,0 +1,261 @@
+#!/bin/bash
+
+# Last update 2025/05/30 by pavroo
+
+MANAGER=`cat /tmp/sparky-mgr`
+if [ "$MANAGER" = "APT" ]; then
+	MANAGER="apt"
+elif [ "$MANAGER" = "Aptitude" ]; then
+	MANAGER="aptitude"
+elif [ "$MANAGER" = "Nala" ]; then
+	MANAGER="nala"
+else
+	MANAGER="apt"
+fi
+
+TITLETEXT="Debian Linux Kernel Installer"
+TEXT="Choose a kernel to install:"
+ARCH64=`uname -r | grep "amd64" | awk '{print $1}'`
+ARCHX64=`uname -r | grep "x64" | awk '{print $1}'`
+ARCH686=`uname -r | grep "686"`
+if [ "$ARCH64" != "" ]; then
+	ARCH="OK"
+elif [ "$ARCHX64" != "" ]; then
+	ARCH="OK"
+elif [ "$ARCH686" != "" ]; then
+	ARCH="OK"
+else
+	ARCH=""
+fi
+
+# check unsupported archs
+if [ "$ARCH" = "" ]; then
+	dialog --title "$TITLETEXT" --msgbox "\nIt works with i686 and x86_64 kernels only...\nExiting now..." 20 80
+	clear
+	/usr/lib/sparky-package-tool/kernel
+	exit 0
+fi
+
+# sparky version
+SPARKY6=`cat /etc/sparky/info | grep Tolo`
+SPARKY7=`cat /etc/sparky/info | grep Orion`
+#SPARKY8=`cat /etc/sparky/info | grep Sisters`
+
+mainmenu () {
+if [ "$ARCH686" != "" ]; then
+	# 32 bit stable and oldstable only
+	paemenu
+else
+	# 64 bit stable, oldstable and testing
+	amd64menu
+fi
+}
+
+amd64menu () {
+if [ "$SPARKY6" != "" ] || [ "$SPARKY7" != "" ]; then
+	# 64 bit stable and oldstable
+dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest amd64 Debian kernel" 64BACK "Install the latest amd64 Debian kernel Backports" 64_RT "Install the latest amd64 Debian kernel (RealTime)" 64_RTBACK "Install the latest amd64 Debian kernel Backports (RealTime)" --yesno 2>/tmp/spt-kernel-install
+else
+	# 64 bit testing (now: debian 13 trixie/sparky 8 sisters)
+dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest amd64 Debian kernel" 64_RT "Install the latest amd64 Debian kernel (RealTime)" --yesno 2>/tmp/spt-kernel-install
+fi
+
+if [ "$?" != "0" ]; then
+	INSTKERNEL=`cat /tmp/spt-kernel-install | head -n1`
+else
+	INSTKERNEL="Exit"
+fi
+
+if [ "$INSTKERNEL" = "Exit" ]; then
+	clear
+	dialog --title "$TITLETEXT" --msgbox "\nExiting..." 20 80
+	clear
+	exitmenu
+fi
+
+if [ "$INSTKERNEL" = "64" ]; then
+	clear
+	sudo $MANAGER install linux-image-amd64 linux-headers-amd64
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+
+elif [ "$INSTKERNEL" = "64BACK" ]; then
+	clear
+	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
+		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
+	fi
+	if [ "$SPARKY7" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bookworm-backports linux-image-amd64 linux-headers-amd64
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+	if [ "$SPARKY6" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bullseye-backports linux-image-amd64 linux-headers-amd64
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+	
+elif [ "$INSTKERNEL" = "64_RT" ]; then
+	clear
+	sudo $MANAGER install linux-image-rt-amd64 linux-headers-rt-amd64
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+
+elif [ "$INSTKERNEL" = "64_RTBACK" ]; then
+	clear
+	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
+		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
+	fi
+	if [ "$SPARKY7" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bookworm-backports linux-image-rt-amd64 linux-headers-rt-amd64
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+	if [ "$SPARKY6" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bullseye-backports linux-image-rt-amd64 linux-headers-rt-amd64
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+fi
+}
+
+paemenu () {
+# 32 bit stable and oldstable only
+dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" NON_PAE "Install the latest i686 NON-PAE Debian kernel" NON_PAEBACK "Install the latest i686 NON-PAE Debian kernel Backports" PAE "Install the latest i686-PAE Debian kernel" PAEBACK "Install the latest i686-PAE Debian kernel Backports" PAE_RT "Install the latest i686-PAE Debian kernel (RealTime)" PAE_RTBACK "Install the latest i686-PAE Debian kernel Backports (RealTime)" --yesno 2>/tmp/spt-kernel-install
+
+if [ "$?" != "0" ]; then
+	INSTKERNEL=`cat /tmp/spt-kernel-install | head -n1`
+else
+	INSTKERNEL="Exit"
+fi
+
+if [ "$INSTKERNEL" = "Exit" ]; then
+	clear
+	dialog --title "$TITLETEXT" --msgbox "\nExiting..." 20 80
+	clear
+	exitmenu
+fi
+
+if [ "$INSTKERNEL" = "NON_PAE" ]; then
+	clear
+	sudo $MANAGER install linux-image-686 linux-headers-686
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+
+elif [ "$INSTKERNEL" = "NON_PAEBACK" ]; then
+	clear
+	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
+		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
+	fi
+	if [ "$SPARKY7" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bookworm-backports linux-image-686 linux-headers-686
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+	if [ "$SPARKY6" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bullseye-backports linux-image-686 linux-headers-686
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+
+elif [ "$INSTKERNEL" = "PAE" ]; then
+	clear
+	sudo $MANAGER install linux-image-686-pae linux-headers-686-pae
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+
+elif [ "$INSTKERNEL" = "PAEBACK" ]; then
+	clear
+	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
+		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
+	fi
+	if [ "$SPARKY7" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bookworm-backports linux-image-686-pae linux-headers-686-pae
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+	if [ "$SPARKY6" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bullseye-backports linux-image-686-pae linux-headers-686-pae
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+
+elif [ "$INSTKERNEL" = "PAE_RT" ]; then
+	clear
+	sudo $MANAGER install linux-image-rt-686-pae linux-headers-rt-686-pae
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+
+elif [ "$INSTKERNEL" = "PAE_RTBACK" ]; then
+	clear
+	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
+		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
+	fi
+	if [ "$SPARKY7" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bookworm-backports linux-image-rt-686-pae linux-headers-rt-686-pae
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+	if [ "$SPARKY6" != "" ]; then
+sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo $MANAGER update
+	sudo $MANAGER install -t bullseye-backports linux-image-rt-686-pae linux-headers-rt-686-pae
+	echo 'Press <ENTER> to Exit...' && read
+	clear
+	exitmenu
+	fi
+else
+	clear
+	exitmenu
+fi
+}
+
+exitmenu () {
+if [ "$MANAGER" = "apt" ]; then
+	clear
+	spta
+elif [ "$MANAGER" = "aptitude" ]; then
+	clear
+	sptt
+elif [ "$MANAGER" = "nala" ]; then
+	clear
+	sptn
+else
+	clear
+	spt
+fi
+}
+
+mainmenu

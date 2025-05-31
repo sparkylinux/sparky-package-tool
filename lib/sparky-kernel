@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Last update 2025/05/25 by pavroo
+# Last update 2025/05/25.1 by pavroo
 
 MANAGER=`cat /tmp/sparky-mgr`
 if [ "$MANAGER" = "APT" ]; then
@@ -13,6 +13,7 @@ else
 	MANAGER="apt"
 fi
 
+SPARKY6=`cat /etc/sparky/info | grep Tolo`
 TITLETEXT="Sparky Linux Kernel Installer"
 TEXT="Choose a kernel to install:"
 ARCH64=`uname -r | grep "amd64" | awk '{print $1}'`
@@ -37,7 +38,11 @@ if [ "$ARCH" = "" ]; then
 	exit 0
 fi
 
-dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest 64 bit Sparky kernel" 64_LTS_66 "Install the latest 64 bit Sparky kernel (6.6 LTS)" 64_LTS_612 "Install the latest 64 bit Sparky kernel (6.12 LTS)" --yesno 2>/tmp/spt-kernel-install
+if [ "$SPARKY6" != "" ]; then
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest 64 bit Sparky kernel" 64_LTS_515 "Install the latest 64 bit Sparky kernel (5.15 LTS)" --yesno 2>/tmp/spt-kernel-install
+else
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest 64 bit Sparky kernel" 64_LTS_66 "Install the latest 64 bit Sparky kernel (6.6 LTS)" 64_LTS_612 "Install the latest 64 bit Sparky kernel (6.12 LTS)" --yesno 2>/tmp/spt-kernel-install
+fi
 
 if [ "$?" != "0" ]; then
 	INSTKERNEL=`cat /tmp/spt-kernel-install | head -n1`
@@ -71,6 +76,10 @@ elif [ "$INSTKERNEL" = "64_LTS_66" ]; then
 elif [ "$INSTKERNEL" = "64_LTS_612" ]; then
 	clear
 	sudo $MANAGER install linux-image-sparky-lts612-amd64 linux-headers-sparky-lts612-amd64
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "64_LTS_515" ]; then
+	clear
+	sudo $MANAGER install linux-image-sparky-lts-amd64 linux-headers-sparky-lts-amd64
 	echo 'Press <ENTER> to Exit...' && read
 else
 	clear

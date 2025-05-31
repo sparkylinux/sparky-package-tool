@@ -2,7 +2,7 @@
 
 # deps: bash, coreutils, apt, dialog, grep, sudo
 # + aptitude, nala (optional)
-# Last update 2025/05/24 by pavroo
+# Last update 2025/05/31 by pavroo
 
 DIALOG="`which dialog`"
 YESNO="--yesno "
@@ -33,6 +33,7 @@ fi
 clear
 $DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"\nChoose an action using $MANAGER :" $HEIGHT $WIDTH $MENUHEIGHT \
 Back "Back to main menu" \
+Debian "Install Debian Linux kernel" \
 Sparky "Install Sparky Linux kernel" \
 Remove "Uninstall a Linux kernel" \
 Exit "Exit" 2>/tmp/sparky-kernel
@@ -48,6 +49,8 @@ clear
 
 if [ "$ACTIONKER" = "Back" ]; then
 	spt
+elif [ "$ACTIONKER" = "Debian" ]; then
+	/usr/lib/sparky-package-tool/debian-kernel
 elif [ "$ACTIONKER" = "Sparky" ]; then
 	/usr/lib/sparky-package-tool/sparky-kernel
 elif [ "$ACTIONKER" = "Remove" ]; then
