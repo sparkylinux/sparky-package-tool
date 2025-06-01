@@ -60,7 +60,7 @@ else
 	clear
 	exit 0
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 
 if [ "$NEWACTION" = "Back" ]; then
 	backmenu
@@ -139,7 +139,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 
 clear
 dpkg-query -l | grep $PACKAGE
@@ -157,7 +157,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 nala show $PACKAGE
@@ -175,7 +175,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 nala search $PACKAGE
@@ -231,7 +231,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 sudo nala install $PACKAGE
@@ -268,7 +268,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 sudo nala purge $PACKAGE

@@ -58,7 +58,7 @@ else
 	clear
 	exit 0
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 
 if [ "$NEWACTION" = "Back" ]; then
 	backmenu
@@ -137,7 +137,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 
 clear
 dpkg-query -l | grep $PACKAGE
@@ -155,7 +155,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 aptitude show $PACKAGE
@@ -173,7 +173,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 aptitude search $PACKAGE
@@ -191,7 +191,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 #if [ ! -d $HOME/Downloads ]; then
@@ -213,7 +213,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 sudo aptitude install -s -R $PACKAGE
@@ -231,7 +231,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 sudo aptitude install -R $PACKAGE
@@ -249,7 +249,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 sudo aptitude reinstall $PACKAGE
@@ -267,7 +267,7 @@ else
 	clear
 	mainmenu
 fi
-rm /tmp/choice.$$
+sudo rm /tmp/choice.$$
 clear
 
 sudo aptitude purge $PACKAGE

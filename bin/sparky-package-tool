@@ -2,10 +2,18 @@
 
 # deps: bash, coreutils, apt, dialog, grep, sudo
 # + aptitude, nala (optional)
-# Last update 2025/05/20 by pavroo
+# Last update 2025/05/31.1 by pavroo
 
 if [ -f /tmp/sparky-mgr ]; then
 	rm -f /tmp/sparky-mgr
+fi
+
+if [ -f /tmp/sparky-mgr ]; then
+	echo ""
+	echo "  sparky-mgr file is locked!"
+	echo "  clean it up before launchig it again!"
+	echo ""
+	sudo rm -f /tmp/sparky-mgr
 fi
 
 DIALOG="`which dialog`"
@@ -19,7 +27,7 @@ MENU="--menu"
 TEXT=""
 TITLETEXT="Sparky Package Tool (SPT)"
 
-$DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"\nChoose Package Manager Interface" $HEIGHT $WIDTH $MENUHEIGHT \
+sudo $DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"\nChoose Package Manager Interface" $HEIGHT $WIDTH $MENUHEIGHT \
 APT "Advanced Package Tool" \
 Aptitude "Front-end to APT" \
 Nala "Front-end for libapt-pkg" \

@@ -28,6 +28,18 @@ else
 	ARCH=""
 fi
 
+if [ -f /tmp/spt-kernel-install ]; then
+	rm -f /tmp/spt-kernel-install
+fi
+if [ -f /tmp/spt-kernel-install ]; then
+	clear
+	echo ""
+	echo "  spt-kernel-install file is locked!"
+	echo "  clean it up before launchig it again!"
+	echo ""
+	sudo rm -f /tmp/spt-kernel-install
+fi
+
 # check unsupported archs
 if [ "$ARCH" = "" ]; then
 	dialog --title "$TITLETEXT" --msgbox "\nIt works with i686 and x86_64 kernels only...\nExiting now..." 20 80

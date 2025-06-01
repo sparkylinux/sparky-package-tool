@@ -29,6 +29,14 @@ fi
 if [ -f /tmp/sparky-kernel ]; then
 	rm -f /tmp/sparky-kernel
 fi
+if [ -f /tmp/sparky-kernel ]; then
+	clear
+	echo ""
+	echo "  sparky-kernel file is locked!"
+	echo "  clean it up before launchig it again!"
+	echo ""
+	sudo rm -f /tmp/sparky-kernel
+fi
 
 clear
 $DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"\nChoose an action using $MANAGER :" $HEIGHT $WIDTH $MENUHEIGHT \
