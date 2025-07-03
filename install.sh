@@ -27,7 +27,7 @@ if [ "$1" = "uninstall" ]; then
 else
 	cp bin/* /usr/bin/
 	if [ ! -d /usr/lib/sparky-package-tool ]; then
-		nkdir -p  /usr/lib/sparky-package-tool
+		mkdir -p  /usr/lib/sparky-package-tool
 	fi
 	cp lib/* /usr/lib/sparky-package-tool/
 fi
