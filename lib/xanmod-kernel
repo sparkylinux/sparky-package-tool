@@ -1,0 +1,155 @@
+#!/bin/bash
+
+# Last update 2025/07/21 by pavroo
+
+MANAGER=`cat /tmp/sparky-mgr`
+if [ "$MANAGER" = "APT" ]; then
+	MANAGER="apt"
+elif [ "$MANAGER" = "Aptitude" ]; then
+	MANAGER="aptitude"
+elif [ "$MANAGER" = "Nala" ]; then
+	MANAGER="nala"
+else
+	MANAGER="apt"
+fi
+
+TITLETEXT="Xanmod Linux Kernel Installer"
+TEXT="Choose a kernel to install:"
+ARCH64=`uname -r | grep "amd64" | awk '{print $1}'`
+ARCHX64=`uname -r | grep "x64" | awk '{print $1}'`
+RELEASE=`lsb_release -sc`
+if [ "$RELEASE" = "seven-sisters" ]; then
+	DEBVER="trixie"
+elif [ "$RELEASE" = "orion-belt" ]; then
+	DEBVER="bookworm"
+else
+	DEBVER="bullseye"
+fi
+TESTXANREPO=`dpkg-query -l | grep xanmod-repository`
+if [ "$ARCH64" != "" ]; then
+	ARCH="OK"
+elif [ "$ARCHX64" != "" ]; then
+	ARCH="OK"
+else
+	ARCH=""
+fi
+
+if [ -f /tmp/spt-kernel-install ]; then
+	rm -f /tmp/spt-kernel-install
+fi
+if [ -f /tmp/spt-kernel-install ]; then
+	clear
+	echo ""
+	echo "  spt-kernel-install file is locked!"
+	echo "  clean it up before launchig it again!"
+	echo ""
+	sudo rm -f /tmp/spt-kernel-install
+fi
+
+# check unsupported archs
+if [ "$ARCH" = "" ]; then
+	dialog --title "$TITLETEXT" --msgbox "\nIt works with x86_64 kernels only...\nExiting now..." 20 80
+	clear
+	/usr/lib/sparky-package-tool/kernel
+	exit 0
+fi
+
+# choose xnanmod kernel to install
+dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" EDGE2 "Install latest XanMod Linux kernel v2" EDGE3 "Install latest XanMod Linux kernel v3" MAIN2 "Install current stable XanMod Linux kernel v2" MAIN3 "Install current stable XanMod Linux kernel v3" LTS2 "Install Long Term Support XanMod kernel v2" LTS3 "Install Long Term Support XanMod kernel v3" RT2 "Install latest Real-time XanMod Linux kernel v2" RT3 "Install latest Real-time XanMod Linux kernel v3" --yesno 2>/tmp/spt-kernel-install
+
+if [ "$?" != "0" ]; then
+	INSTKERNEL=`cat /tmp/spt-kernel-install | head -n1`
+else
+	INSTKERNEL="Exit"
+fi
+
+if [ "$INSTKERNEL" = "Exit" ]; then
+	clear
+	dialog --title "$TITLETEXT" --msgbox "\nExiting..." 20 80
+	clear
+	if [ "$MANAGER" = "apt" ]; then
+		spta
+	elif [ "$MANAGER" = "aptitude" ]; then
+		sptt
+	elif [ "$MANAGER" = "nala" ]; then
+		sptn
+	else
+		spt
+	fi
+fi
+
+if [ "$INSTKERNEL" != "Exit" ]; then
+	if [ ! -f /etc/apt/keyrings/xanmod-archive-keyring.gpg ]; then
+		wget -O - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-archive-keyring.gpg
+	fi
+	if [ "$TESTXANREPO" = "" ]; then
+		sudo $MANAGER update && sudo $MANAGER install xanmod-repository -y
+	fi
+	sudo rm -f /etc/apt/sources.list.d/xanmod-kernel.list
+	sudo rm -f /etc/apt/sources.list.d/xanmod-release.list
+sudo cat > /etc/apt/sources.list.d/xanmod-release.list <<FOO
+deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org $DEBVER main
+FOO
+fi
+
+if [ "$INSTKERNEL" = "EDGE2" ]; then
+	# install latest EDGEv2 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-edge-x64v2
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "EDGE3" ]; then
+	# install latest EDGEv3 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-edge-x64v3
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "MAIN2" ]; then
+	# install current MAINv2 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-x64v2
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "MAIN3" ]; then
+	# install current MAINv3 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-x64v3
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "LTS2" ]; then
+	# install stable LTSv2 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-lts-x64v2
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "LTS3" ]; then
+	# install stable LTSv3 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-lts-x64v3
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "RT2" ]; then
+	# install latest real-timev2 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-rt-x64v2
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "RT3" ]; then
+	# install latest real-timev3 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-rt-x64v3
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "Exit" ]; then
+	clear
+	exit 0
+else
+	clear
+	exit 0
+fi
+
+clear
+
+if [ "$MANAGER" = "apt" ]; then
+	spta
+elif [ "$MANAGER" = "aptitude" ]; then
+	sptt
+elif [ "$MANAGER" = "nala" ]; then
+	sptn
+else
+	spt
+fi
+
+exit 0

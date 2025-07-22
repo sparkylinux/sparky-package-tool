@@ -2,7 +2,7 @@
 
 # deps: bash, coreutils, apt, dialog, grep, sudo
 # + aptitude, nala (optional)
-# Last update 2025/05/31 by pavroo
+# Last update 2025/07/21 by pavroo
 
 DIALOG="`which dialog`"
 YESNO="--yesno "
@@ -43,6 +43,7 @@ $DIALOG $TITLE"$TITLETEXT" $MENU $TEXT"\nChoose an action using $MANAGER :" $HEI
 Back "Back to main menu" \
 Debian "Install Debian Linux kernel" \
 Sparky "Install Sparky Linux kernel" \
+XanMod "Install XanMod Linux kernel" \
 Remove "Uninstall a Linux kernel" \
 Exit "Exit" 2>/tmp/sparky-kernel
 
@@ -56,12 +57,19 @@ fi
 clear
 
 if [ "$ACTIONKER" = "Back" ]; then
+	clear
 	spt
 elif [ "$ACTIONKER" = "Debian" ]; then
+	clear
 	/usr/lib/sparky-package-tool/debian-kernel
 elif [ "$ACTIONKER" = "Sparky" ]; then
+	clear
 	/usr/lib/sparky-package-tool/sparky-kernel
+elif [ "$ACTIONKER" = "XanMod" ]; then
+	clear
+	/usr/lib/sparky-package-tool/xanmod-kernel
 elif [ "$ACTIONKER" = "Remove" ]; then
+	clear
 	/usr/lib/sparky-package-tool/old-kernel
 elif [ "$ACTIONKER" = "Exit" ]; then
 	clear
