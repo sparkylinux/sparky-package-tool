@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Last update 2025/08/05 by pavroo
+
+MANAGER=`cat /tmp/sparky-mgr`
+if [ "$MANAGER" = "APT" ]; then
+	MANAGER="apt"
+elif [ "$MANAGER" = "Aptitude" ]; then
+	MANAGER="aptitude"
+elif [ "$MANAGER" = "Nala" ]; then
+	MANAGER="nala"
+else
+	MANAGER="apt"
+fi
+
+TITLETEXT="Liquorix Linux Kernel Installer"
+TEXT="Choose a kernel to install:"
+ARCH64=`uname -r | grep "amd64" | awk '{print $1}'`
+ARCHX64=`uname -r | grep "x64" | awk '{print $1}'`
+#RELEASE=`lsb_release -sc`
+#if [ "$RELEASE" = "seven-sisters" ]; then
+#	DEBVER="trixie"
+#elif [ "$RELEASE" = "orion-belt" ]; then
+#	DEBVER="bookworm"
+#else
+#	DEBVER="bullseye"
+#fi
+DEBVER=`cat /usr/lib/os-release | grep DEBIAN_CODENAME | cut -f2 -d=`
+if [ "$DEBVER" = " " ]; then
+	DEBVER="bullseye"
+else
+	DEBVER=$DEBVER
+fi
+#TESTXANREPO=`dpkg-query -l | grep xanmod-repository`
+if [ "$ARCH64" != "" ]; then
+	ARCH="OK"
+elif [ "$ARCHX64" != "" ]; then
+	ARCH="OK"
+else
+	ARCH=""
+fi
+
+if [ -f /tmp/spt-kernel-install ]; then
+	rm -f /tmp/spt-kernel-install
+fi
+if [ -f /tmp/spt-kernel-install ]; then
+	clear
+	echo ""
+	echo "  spt-kernel-install file is locked!"
+	echo "  clean it up before launchig it again!"
+	echo ""
+	sudo rm -f /tmp/spt-kernel-install
+fi
+
+# check unsupported archs
+if [ "$ARCH" = "" ]; then
+	dialog --title "$TITLETEXT" --msgbox "\nIt works with x86_64 kernels only...\nExiting now..." 20 80
+	clear
+	/usr/lib/sparky-package-tool/kernel
+	exit 0
+fi
+
+# choose liquorix kernel to install
+dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install latest Liquorix Linux kernel" --yesno 2>/tmp/spt-kernel-install
+
+if [ "$?" != "0" ]; then
+	INSTKERNEL=`cat /tmp/spt-kernel-install | head -n1`
+else
+	INSTKERNEL="Exit"
+fi
+
+if [ "$INSTKERNEL" = "Exit" ]; then
+	clear
+	dialog --title "$TITLETEXT" --msgbox "\nExiting..." 20 80
+	clear
+	if [ "$MANAGER" = "apt" ]; then
+		spta
+	elif [ "$MANAGER" = "aptitude" ]; then
+		sptt
+	elif [ "$MANAGER" = "nala" ]; then
+		sptn
+	else
+		spt
+	fi
+fi
+
+if [ "$INSTKERNEL" != "Exit" ]; then
+	# install Liquorix keyring
+	if [ ! -f /etc/apt/trusted.gpg.d/liquorix-keyring.gpg ]; then
+		sudo wget -O - https://liquorix.net/liquorix-keyring.gpg | sudo tee /etc/apt/trusted.gpg.d/liquorix-keyring.gpg
+	fi
+	# check the Liquorix list
+	if [ -f /etc/apt/sources.list.d/liquorix.list ]; then
+		sudo rm -f /etc/apt/sources.list.d/liquorix.list
+	fi
+	# create new list
+	sudo echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/liquorix-keyring.gpg] https://liquorix.net/debian $DEBVER main" | sudo tee /etc/apt/sources.list.d/liquorix.list
+	#sudo echo "deb-src [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/liquorix-keyring.gpg] https://liquorix.net/debian $DEBVER main" | sudo tee /etc/apt/sources.list.d/liquorix.list
+
+	# install latest liquorix kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-image-liquorix-amd64 linux-headers-liquorix-amd64
+	echo 'Press <ENTER> to Exit...' && read
+fi
+
+clear
+
+if [ "$MANAGER" = "apt" ]; then
+	spta
+elif [ "$MANAGER" = "aptitude" ]; then
+	sptt
+elif [ "$MANAGER" = "nala" ]; then
+	sptn
+else
+	spt
+fi
+
+exit 0
