@@ -20,7 +20,7 @@ if [ -f /tmp/old-kernel-remover ]; then
 	clear
 	echo ""
 	echo "  old-kernel-remover file is locked!"
-	echo "  clean it up before launchig it again!"
+	echo "  clean it up before launching it again!"
 	echo ""
 	sudo rm -f /tmp/old-kernel-remover
 fi

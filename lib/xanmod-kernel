@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Last update 2025/07/21 by pavroo
+# Last update 2025/12/10 by pavroo
 
 MANAGER=`cat /tmp/sparky-mgr`
 if [ "$MANAGER" = "APT" ]; then
@@ -17,13 +17,19 @@ TITLETEXT="Xanmod Linux Kernel Installer"
 TEXT="Choose a kernel to install:"
 ARCH64=`uname -r | grep "amd64" | awk '{print $1}'`
 ARCHX64=`uname -r | grep "x64" | awk '{print $1}'`
-RELEASE=`lsb_release -sc`
-if [ "$RELEASE" = "seven-sisters" ]; then
-	DEBVER="trixie"
-elif [ "$RELEASE" = "orion-belt" ]; then
-	DEBVER="bookworm"
-else
+#RELEASE=`lsb_release -sc`
+#if [ "$RELEASE" = "seven-sisters" ]; then
+#	DEBVER="trixie"
+#elif [ "$RELEASE" = "orion-belt" ]; then
+#	DEBVER="bookworm"
+#else
+#	DEBVER="bullseye"
+#fi
+DEBVER=`cat /usr/lib/os-release | grep DEBIAN_CODENAME | cut -f2 -d=`
+if [ "$DEBVER" = " " ]; then
 	DEBVER="bullseye"
+else
+	DEBVER=$DEBVER
 fi
 TESTXANREPO=`dpkg-query -l | grep xanmod-repository`
 if [ "$ARCH64" != "" ]; then
@@ -41,7 +47,7 @@ if [ -f /tmp/spt-kernel-install ]; then
 	clear
 	echo ""
 	echo "  spt-kernel-install file is locked!"
-	echo "  clean it up before launchig it again!"
+	echo "  clean it up before launching it again!"
 	echo ""
 	sudo rm -f /tmp/spt-kernel-install
 fi
@@ -55,7 +61,7 @@ if [ "$ARCH" = "" ]; then
 fi
 
 # choose xnanmod kernel to install
-dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" EDGE2 "Install latest XanMod Linux kernel v2" EDGE3 "Install latest XanMod Linux kernel v3" MAIN2 "Install current stable XanMod Linux kernel v2" MAIN3 "Install current stable XanMod Linux kernel v3" LTS2 "Install Long Term Support XanMod kernel v2" LTS3 "Install Long Term Support XanMod kernel v3" RT2 "Install latest Real-time XanMod Linux kernel v2" RT3 "Install latest Real-time XanMod Linux kernel v3" --yesno 2>/tmp/spt-kernel-install
+dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" EDGE2 "Install latest XanMod Linux kernel v2" EDGE3 "Install latest XanMod Linux kernel v3" MAIN2 "Install current stable XanMod Linux kernel v2" MAIN3 "Install current stable XanMod Linux kernel v3" LTS1 "Install Long Term Support XanMod kernel v1" LTS2 "Install Long Term Support XanMod kernel v2" LTS3 "Install Long Term Support XanMod kernel v3" RT2 "Install latest Real-time XanMod Linux kernel v2" RT3 "Install latest Real-time XanMod Linux kernel v3" --yesno 2>/tmp/spt-kernel-install
 
 if [ "$?" != "0" ]; then
 	INSTKERNEL=`cat /tmp/spt-kernel-install | head -n1`
@@ -111,6 +117,11 @@ elif [ "$INSTKERNEL" = "MAIN3" ]; then
 	# install current MAINv3 kernel
 	clear
 	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-x64v3
+	echo 'Press <ENTER> to Exit...' && read
+elif [ "$INSTKERNEL" = "LTS1" ]; then
+	# install stable LTSv1 kernel
+	clear
+	sudo $MANAGER update && sudo $MANAGER install linux-xanmod-lts-x64v1
 	echo 'Press <ENTER> to Exit...' && read
 elif [ "$INSTKERNEL" = "LTS2" ]; then
 	# install stable LTSv2 kernel
