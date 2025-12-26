@@ -2,7 +2,7 @@
 
 # deps: bash, coreutils, apt, dialog, grep, sudo
 # + aptitude, nala (optional)
-# Last update 2025/08/05 by pavroo
+# Last update 2025/12/16 by pavroo
 
 DIALOG="`which dialog`"
 YESNO="--yesno "
@@ -27,7 +27,7 @@ else
 fi
 
 if [ -f /tmp/sparky-kernel ]; then
-	rm -f /tmp/sparky-kernel
+	sudo rm -f /tmp/sparky-kernel
 fi
 if [ -f /tmp/sparky-kernel ]; then
 	clear
@@ -62,19 +62,19 @@ if [ "$ACTIONKER" = "Back" ]; then
 	spt
 elif [ "$ACTIONKER" = "Debian" ]; then
 	clear
-	/usr/lib/sparky-package-tool/debian-kernel
+	sudo /usr/lib/sparky-package-tool/debian-kernel
 elif [ "$ACTIONKER" = "Liquorix" ]; then
 	clear
-	/usr/lib/sparky-package-tool/liquorix-kernel
+	sudo /usr/lib/sparky-package-tool/liquorix-kernel
 elif [ "$ACTIONKER" = "Sparky" ]; then
 	clear
-	/usr/lib/sparky-package-tool/sparky-kernel
+	sudo /usr/lib/sparky-package-tool/sparky-kernel
 elif [ "$ACTIONKER" = "XanMod" ]; then
 	clear
-	/usr/lib/sparky-package-tool/xanmod-kernel
+	sudo /usr/lib/sparky-package-tool/xanmod-kernel
 elif [ "$ACTIONKER" = "Remove" ]; then
 	clear
-	/usr/lib/sparky-package-tool/old-kernel
+	sudo /usr/lib/sparky-package-tool/old-kernel
 elif [ "$ACTIONKER" = "Exit" ]; then
 	clear
 	exit 0

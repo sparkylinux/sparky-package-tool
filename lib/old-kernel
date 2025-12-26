@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Last update 2025/07/21 by pavroo
+# Last update 2025/12/16 by pavroo
 
 MANAGER=`cat /tmp/sparky-mgr`
 if [ "$MANAGER" = "APT" ]; then
@@ -25,10 +25,10 @@ if [ -f /tmp/old-kernel-remover ]; then
 	sudo rm -f /tmp/old-kernel-remover
 fi
 mkdir -p /tmp/old-kernel-remover
-touch /tmp/old-kernel-remover/kernellist0
-touch /tmp/old-kernel-remover/kernellist
+sudo touch /tmp/old-kernel-remover/kernellist0
+sudo touch /tmp/old-kernel-remover/kernellist
 KERNELACTIVE=`uname -r`
-dpkg-query -l | grep linux-image | grep -v meta | grep -v meta-package | grep -v template | cut -d ' ' -f 3 > /tmp/old-kernel-remover/kernellist0
+sudo dpkg-query -l | grep linux-image | grep -v meta | grep -v meta-package | grep -v template | cut -d ' ' -f 3 > /tmp/old-kernel-remover/kernellist0
 TEXT="The actual (active) kernel is: $KERNELACTIVE \nChoose a kernel to remove:"
 TITLETEXT="Old Kernel Remover"
 KERNELNUMBER=`cat /tmp/old-kernel-remover/kernellist0 | wc -l`
@@ -44,7 +44,7 @@ if [ "$KERNELNUMBER" = "1" ]; then
 	exit 0
 fi
 # list kernels
-cat /tmp/old-kernel-remover/kernellist0 | grep -v "$KERNELACTIVE" > /tmp/old-kernel-remover/kernellist
+sudo cat /tmp/old-kernel-remover/kernellist0 | grep -v "$KERNELACTIVE" > /tmp/old-kernel-remover/kernellist
 
 for i in `cat /tmp/old-kernel-remover/kernellist`; do
 	KER="$KER $i Installed"

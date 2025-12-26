@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Last update 2025/05/30 by pavroo
+# Last update 2025/12/16 by pavroo
 
 MANAGER=`cat /tmp/sparky-mgr`
 if [ "$MANAGER" = "APT" ]; then
@@ -28,6 +28,13 @@ else
 	ARCH=""
 fi
 
+DEBVER=`cat /usr/lib/os-release | grep DEBIAN_CODENAME | cut -f2 -d=`
+if [ "$DEBVER" = " " ]; then
+	DEBVER="bullseye"
+else
+	DEBVER=$DEBVER
+fi
+
 if [ -f /tmp/spt-kernel-install ]; then
 	rm -f /tmp/spt-kernel-install
 fi
@@ -51,7 +58,8 @@ fi
 # sparky version
 SPARKY6=`cat /etc/sparky/info | grep Tolo`
 SPARKY7=`cat /etc/sparky/info | grep Orion`
-#SPARKY8=`cat /etc/sparky/info | grep Sisters`
+SPARKY8=`cat /etc/sparky/info | grep Sisters`
+SPARKY9=`cat /etc/sparky/info | grep Tiamat`
 
 mainmenu () {
 if [ "$ARCH686" != "" ]; then
@@ -64,12 +72,12 @@ fi
 }
 
 amd64menu () {
-if [ "$SPARKY6" != "" ] || [ "$SPARKY7" != "" ]; then
-	# 64 bit stable and oldstable
-dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest amd64 Debian kernel" 64BACK "Install the latest amd64 Debian kernel Backports" 64_RT "Install the latest amd64 Debian kernel (RealTime)" 64_RTBACK "Install the latest amd64 Debian kernel Backports (RealTime)" --yesno 2>/tmp/spt-kernel-install
+if [ "$SPARKY9" != "" ]; then
+	# 64 bit testing (now: debian 14 forky/sparky 9 tiamat)
+	dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest amd64 Debian kernel" 64_RT "Install the latest amd64 Debian kernel (RealTime)" --yesno 2>/tmp/spt-kernel-install
 else
-	# 64 bit testing (now: debian 13 trixie/sparky 8 sisters)
-dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest amd64 Debian kernel" 64_RT "Install the latest amd64 Debian kernel (RealTime)" --yesno 2>/tmp/spt-kernel-install
+	# 64 bit stable, oldstable nad oldoldstable
+dialog --title "$TITLETEXT" --menu "$TEXT" 20 80 30 Exit "Exit" 64 "Install the latest amd64 Debian kernel" 64BACK "Install the latest amd64 Debian kernel Backports" 64_RT "Install the latest amd64 Debian kernel (RealTime)" 64_RTBACK "Install the latest amd64 Debian kernel Backports (RealTime)" --yesno 2>/tmp/spt-kernel-install
 fi
 
 if [ "$?" != "0" ]; then
@@ -97,23 +105,13 @@ elif [ "$INSTKERNEL" = "64BACK" ]; then
 	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
 		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
 	fi
-	if [ "$SPARKY7" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+	sudo echo "deb http://deb.debian.org/debian $DEBVER-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
 	sudo $MANAGER update
-	sudo $MANAGER install -t bookworm-backports linux-image-amd64 linux-headers-amd64
+	sudo $MANAGER install -t $DEBVER-backports linux-image-amd64 linux-headers-amd64
 	echo 'Press <ENTER> to Exit...' && read
 	clear
 	exitmenu
-	fi
-	if [ "$SPARKY6" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
-	sudo $MANAGER update
-	sudo $MANAGER install -t bullseye-backports linux-image-amd64 linux-headers-amd64
-	echo 'Press <ENTER> to Exit...' && read
-	clear
-	exitmenu
-	fi
-	
+
 elif [ "$INSTKERNEL" = "64_RT" ]; then
 	clear
 	sudo $MANAGER install linux-image-rt-amd64 linux-headers-rt-amd64
@@ -126,22 +124,12 @@ elif [ "$INSTKERNEL" = "64_RTBACK" ]; then
 	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
 		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
 	fi
-	if [ "$SPARKY7" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+sudo echo "deb http://deb.debian.org/debian $DEBVER-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
 	sudo $MANAGER update
-	sudo $MANAGER install -t bookworm-backports linux-image-rt-amd64 linux-headers-rt-amd64
+	sudo $MANAGER install -t $DEBVER-backports linux-image-rt-amd64 linux-headers-rt-amd64
 	echo 'Press <ENTER> to Exit...' && read
 	clear
 	exitmenu
-	fi
-	if [ "$SPARKY6" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
-	sudo $MANAGER update
-	sudo $MANAGER install -t bullseye-backports linux-image-rt-amd64 linux-headers-rt-amd64
-	echo 'Press <ENTER> to Exit...' && read
-	clear
-	exitmenu
-	fi
 fi
 }
 
@@ -174,22 +162,12 @@ elif [ "$INSTKERNEL" = "NON_PAEBACK" ]; then
 	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
 		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
 	fi
-	if [ "$SPARKY7" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+sudo echo "deb http://deb.debian.org/debian $DEBVER-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
 	sudo $MANAGER update
-	sudo $MANAGER install -t bookworm-backports linux-image-686 linux-headers-686
+	sudo $MANAGER install -t $DEBVER-backports linux-image-686 linux-headers-686
 	echo 'Press <ENTER> to Exit...' && read
 	clear
 	exitmenu
-	fi
-	if [ "$SPARKY6" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
-	sudo $MANAGER update
-	sudo $MANAGER install -t bullseye-backports linux-image-686 linux-headers-686
-	echo 'Press <ENTER> to Exit...' && read
-	clear
-	exitmenu
-	fi
 
 elif [ "$INSTKERNEL" = "PAE" ]; then
 	clear
@@ -203,22 +181,12 @@ elif [ "$INSTKERNEL" = "PAEBACK" ]; then
 	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
 		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
 	fi
-	if [ "$SPARKY7" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+sudo echo "deb http://deb.debian.org/debian $DEBVER-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
 	sudo $MANAGER update
-	sudo $MANAGER install -t bookworm-backports linux-image-686-pae linux-headers-686-pae
+	sudo $MANAGER install -t $DEBVER-backports linux-image-686-pae linux-headers-686-pae
 	echo 'Press <ENTER> to Exit...' && read
 	clear
 	exitmenu
-	fi
-	if [ "$SPARKY6" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
-	sudo $MANAGER update
-	sudo $MANAGER install -t bullseye-backports linux-image-686-pae linux-headers-686-pae
-	echo 'Press <ENTER> to Exit...' && read
-	clear
-	exitmenu
-	fi
 
 elif [ "$INSTKERNEL" = "PAE_RT" ]; then
 	clear
@@ -232,22 +200,12 @@ elif [ "$INSTKERNEL" = "PAE_RTBACK" ]; then
 	if [ -f /etc/apt/sources.list.d/debian-backports.list ]; then
 		sudo rm -f /etc/apt/sources.list.d/debian-backports.list
 	fi
-	if [ "$SPARKY7" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bookworm-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
+sudo echo "deb http://deb.debian.org/debian $DEBVER-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
 	sudo $MANAGER update
-	sudo $MANAGER install -t bookworm-backports linux-image-rt-686-pae linux-headers-rt-686-pae
+	sudo $MANAGER install -t $DEBVER-backports linux-image-rt-686-pae linux-headers-rt-686-pae
 	echo 'Press <ENTER> to Exit...' && read
 	clear
 	exitmenu
-	fi
-	if [ "$SPARKY6" != "" ]; then
-sudo echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | sudo tee /etc/apt/sources.list.d/debian-backports.list
-	sudo $MANAGER update
-	sudo $MANAGER install -t bullseye-backports linux-image-rt-686-pae linux-headers-rt-686-pae
-	echo 'Press <ENTER> to Exit...' && read
-	clear
-	exitmenu
-	fi
 else
 	clear
 	exitmenu

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Last update 2025/12/10 by pavroo
+# Last update 2025/12/16 by pavroo
 
 MANAGER=`cat /tmp/sparky-mgr`
 if [ "$MANAGER" = "APT" ]; then
@@ -41,7 +41,7 @@ else
 fi
 
 if [ -f /tmp/spt-kernel-install ]; then
-	rm -f /tmp/spt-kernel-install
+	sudo rm -f /tmp/spt-kernel-install
 fi
 if [ -f /tmp/spt-kernel-install ]; then
 	clear
@@ -56,7 +56,7 @@ fi
 if [ "$ARCH" = "" ]; then
 	dialog --title "$TITLETEXT" --msgbox "\nIt works with x86_64 kernels only...\nExiting now..." 20 80
 	clear
-	/usr/lib/sparky-package-tool/kernel
+	sudo /usr/lib/sparky-package-tool/kernel
 	exit 0
 fi
 
@@ -86,7 +86,7 @@ fi
 
 if [ "$INSTKERNEL" != "Exit" ]; then
 	if [ ! -f /etc/apt/keyrings/xanmod-archive-keyring.gpg ]; then
-		wget -O - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-archive-keyring.gpg
+		sudo wget -O - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-archive-keyring.gpg
 	fi
 	if [ "$TESTXANREPO" = "" ]; then
 		sudo $MANAGER update && sudo $MANAGER install xanmod-repository -y
