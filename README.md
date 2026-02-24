@@ -2,7 +2,7 @@ APT dialog front-end
 The APT dialog based small and simply front-end to text console which lets you make most important works with packages. 
 It also provides the Aptitude and Nala front-end of your choice.
 
-Copyright (C) 2025 Paweł Pijanowski
+Copyright (C) 2026 Paweł Pijanowski
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
